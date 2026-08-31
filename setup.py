@@ -1,5 +1,5 @@
 """
-Minimal packaging setup for CyberDreamer.
+Minimal packaging setup for cyberdream.
 
 Installs the project in editable mode:
 
@@ -15,10 +15,10 @@ Dependencies are intentionally NOT duplicated here; install them via
 from setuptools import find_packages, setup
 
 setup(
-    name="cyberdreamer",
+    name="cyber_dream",
     version="0.1.0",
     description="Graph-RSSM World Model for Predictive Cyber Defense (research prototype).",
-    author="CyberDreamer Team",
+    author="cyber_dream Team",
     packages=find_packages(include=["src", "src.*"]),
     python_requires=">=3.10",
     include_package_data=True,
