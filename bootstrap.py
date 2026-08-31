@@ -2,7 +2,7 @@
 """
 bootstrap.py
 ============
-Scaffolding script for the CyberDreamer project.
+Scaffolding script for the cyberdream project.
 
 Creates the exact directory tree specified for the project and drops a
 minimal, docstring-only stub into every Python file that doesn't already
@@ -102,7 +102,7 @@ def main() -> None:
     parser.add_argument("--dry-run", action="store_true", help="Show what would happen without writing anything.")
     args = parser.parse_args()
 
-    print("== CyberDreamer bootstrap ==")
+    print("== cyberdream bootstrap ==")
     print(f"Root: {ROOT}\n")
 
     print("-- creating directories --")
