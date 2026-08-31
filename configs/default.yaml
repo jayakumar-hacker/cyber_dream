@@ -1,0 +1,169 @@
+# =============================================================================
+# CyberDreamer — default.yaml
+# Master configuration file. Every value here is a placeholder to be tuned
+# during experimentation. Loaded via src/utils/config_loader.py, which also
+# supports merging per-experiment override YAMLs on top of this file.
+# =============================================================================
+
+project:
+  name: "cyberdreamer"
+  seed: 42
+  device: "cuda"          # "cuda" | "cpu" | "mps"
+  run_name: "poc_run_001"
+  experiments_dir: "experiments/${project.run_name}"
+
+# -----------------------------------------------------------------------------
+# Stages 1-2 (WS1/WS2): Feature Pipeline + Graph Builder — src/pipeline/
+# -----------------------------------------------------------------------------
+feature_pipeline:
+  window_size: 60                 # seconds per observation window
+  stride: 10                      # step size between successive windows
+  datasets:
+    - name: "CIC-IDS-2018"
+      raw_path: "data/raw/CIC-IDS-2018/"
+    - name: "CTU-13"
+      raw_path: "data/raw/CTU-13/"
+  processed_output_path: "data/processed/"   # WS1 Parquet output
+  event_sources:
+    - "netflow"
+    - "edr"
+    - "auth_logs"
+    - "dns_logs"
+  normalization:
+    method: "z_score"             # "z_score" | "min_max" | "robust"
+    per_feature_stats_path: "data/processed/feature_stats.json"
+  missing_value_strategy: "forward_fill"   # "forward_fill" | "zero" | "drop"
+  categorical_encoding: "embedding"        # "embedding" | "one_hot"
+
+graph_builder:
+  node_types:
+    - "host"
+    - "user"
+    - "process"
+    - "domain"
+  edge_types:
+    - "connects_to"
+    - "authenticates_as"
+    - "spawns"
+    - "resolves"
+  max_nodes_per_snapshot: 5000
+  max_edges_per_snapshot: 20000
+  snapshot_interval_sec: 60
+  graph_cache_path: "data/graphs/"   # WS2 cached PyG graph objects
+  node_feature_dim: 32               # raw (pre-encoder) node feature dimensionality
+  edge_feature_dim: 8
+
+# -----------------------------------------------------------------------------
+# Stages 3-4: GNN Encoder + RSSM World Model — src/core/
+# -----------------------------------------------------------------------------
+spatial_encoder:
+  architecture: "gat"             # "gat" | "gcn" | "graphsage" | "gin"
+  num_layers: 3
+  hidden_dim: 128
+  output_embedding_dim: 256
+  num_attention_heads: 4
+  dropout: 0.1
+  aggregation: "mean"             # graph-level readout: "mean" | "sum" | "max"
+  use_layer_norm: true
+
+world_model:
+  deterministic_state_dim: 256    # GRU-style recurrent hidden size
+  stochastic_state_dim: 32
+  num_stochastic_categories: 32   # for categorical latent variants
+  hidden_dim: 256
+  min_std: 0.1
+  kl_balance_alpha: 0.8
+  free_nats: 1.0
+
+# -----------------------------------------------------------------------------
+# Stage 5: Prediction Heads — src/heads/
+# -----------------------------------------------------------------------------
+prediction_heads:
+  risk_score_head:
+    hidden_dim: 64
+    output_range: [0.0, 1.0]
+  mitre_stage_classifier_head:
+    hidden_dim: 128
+    num_classes: 7                # MITRE ATT&CK-aligned kill chain stages
+
+# -----------------------------------------------------------------------------
+# Stage 6: Imagination Rollout & Counterfactuals — src/simulator/
+# -----------------------------------------------------------------------------
+imagination_rollout:
+  k_rollout_steps: 15             # number of imagined future steps
+  num_rollout_trajectories: 32    # parallel imagined trajectories (batch)
+  rollout_policy: "learned"       # "learned" | "random" | "scripted"
+  discount_gamma: 0.99
+  lambda_return: 0.95
+  counterfactual:
+    enabled: true
+    max_interventions_per_query: 3
+
+# -----------------------------------------------------------------------------
+# Stage 7: Explainability — src/explainability/
+# -----------------------------------------------------------------------------
+explainability:
+  attention:
+    top_k_contributing_nodes: 10
+    top_k_contributing_edges: 15
+  shap:
+    background_sample_size: 100
+    explainer_type: "gradient"    # "gradient" | "deep" | "kernel"
+  trajectory_viz:
+    method: "umap"                # "umap" | "tsne" | "pca"
+    n_components: 2
+  explanation_output_path: "experiments/${project.run_name}/explanations/"
+
+# -----------------------------------------------------------------------------
+# Stage 8: Evaluation & Benchmarking — src/evaluation/
+# -----------------------------------------------------------------------------
+evaluation:
+  metrics:
+    - "precision_at_k"
+    - "recall_at_k"
+    - "f1_score"
+    - "rollout_calibration_error"
+  test_split_path: "data/processed/test_split.json"
+  num_eval_rollouts: 100
+  baselines:
+    - "logistic_regression"
+    - "lstm_only"
+  results_output_path: "experiments/${project.run_name}/ablation_results.csv"
+
+# -----------------------------------------------------------------------------
+# Demo UI — app/
+# -----------------------------------------------------------------------------
+demo_ui:
+  host: "0.0.0.0"
+  port: 8501
+  refresh_interval_sec: 5
+  max_graph_nodes_rendered: 500
+  theme: "dark"
+
+# -----------------------------------------------------------------------------
+# Training
+# -----------------------------------------------------------------------------
+training:
+  batch_size: 64
+  sequence_length: 50              # timesteps per training sequence
+  num_epochs: 100
+  learning_rate: 3.0e-4
+  optimizer: "adamw"               # "adam" | "adamw" | "sgd"
+  weight_decay: 1.0e-6
+  grad_clip_norm: 100.0
+  lr_scheduler: "cosine"           # "none" | "cosine" | "step"
+  warmup_steps: 1000
+  checkpoint_every_n_steps: 500
+  eval_every_n_steps: 250
+  early_stopping_patience: 10
+  mixed_precision: true
+  checkpoint_dir: "experiments/${project.run_name}/checkpoints/"
+
+# -----------------------------------------------------------------------------
+# Data splits
+# -----------------------------------------------------------------------------
+data:
+  train_split_ratio: 0.7
+  val_split_ratio: 0.15
+  test_split_ratio: 0.15
+  split_seed: 42
