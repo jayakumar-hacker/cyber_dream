@@ -1,8 +1,8 @@
-# CyberDreamer
+# CyberDream
 
 **A Graph‑RSSM World Model for Predictive Cyber Defense.**
 
-> One‑liner: CyberDreamer learns a compressed, dynamic "world model" of an
+> One‑liner: CyberDream learns a compressed, dynamic "world model" of an
 > enterprise network — as a graph — and imagines how an attack will unfold
 > *before* it fully unfolds, so defenders can act on the predicted future
 > instead of reacting to the past.
@@ -10,7 +10,7 @@
 ## Vision & UVP
 
 Most cyber‑defense tooling is fundamentally retrospective: it detects and
-classifies events that have already happened. CyberDreamer takes a
+classifies events that have already happened. CyberDream takes a
 model‑based reinforcement‑learning approach (inspired by world models like
 RSSM/Dreamer) but replaces flat sensor vectors with a **graph** representing
 hosts, users, processes, and domains and how they relate to one another at
@@ -64,7 +64,7 @@ in during the sprint.
 ## Repository Layout
 
 ```
-CyberDreamer/
+cyber_dream/
 ├── .gitignore                    # standard Python + PyTorch + Streamlit ignores
 ├── README.md                     # this file
 ├── requirements.txt
@@ -142,8 +142,8 @@ under their respective licenses/terms.
 
 ```bash
 # 1. Clone
-git clone <repo-url> CyberDreamer
-cd CyberDreamer
+git clone https://jayakumar-hacker_cyber_dream
+cd cyber_dream
 
 # 2. Create an environment
 python -m venv .venv
