@@ -142,7 +142,7 @@ under their respective licenses/terms.
 
 ```bash
 # 1. Clone
-git clone https://jayakumar-hacker_cyber_dream
+git clone https://jayakumar-hacker/cyber_dream.git
 cd cyber_dream
 
 # 2. Create an environment
