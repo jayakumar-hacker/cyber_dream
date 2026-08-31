@@ -6,7 +6,7 @@
 # =============================================================================
 
 project:
-  name: "cyberdreamer"
+  name: "cyberdream"
   seed: 42
   device: "cuda"          # "cuda" | "cpu" | "mps"
   run_name: "poc_run_001"
