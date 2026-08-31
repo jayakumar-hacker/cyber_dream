@@ -1,7 +1,7 @@
 """
 feature_fusion.py
 ==================
-Stage 1 of the CyberDreamer pipeline: Feature Pipeline (Workstream 1 / WS1).
+Stage 1 of the CyberDream pipeline: Feature Pipeline (Workstream 1 / WS1).
 
 Responsible for ingesting raw flow/event records (e.g. CIC-IDS-2018,
 CTU-13), cleaning and normalizing them, and fusing multiple sources into a
