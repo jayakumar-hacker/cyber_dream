@@ -18,11 +18,16 @@ project:
 
 feature_pipeline:
 
-  # Time-window configuration
+  # Sliding time-window configuration.
+  # A record at elapsed time e belongs to every window k where:
+  #   k*stride <= e < k*stride + window_size
+  # window_size == stride gives non-overlapping windows; window_size > stride
+  # gives overlapping sliding windows (each record appears in multiple windows).
   window_size: 60
   stride: 10
 
-  # Current dataset
+  # Datasets to load. Each entry needs a unique `name` and its raw_path.
+  # Add another entry here (e.g. CIC-IDS-2018) to fuse multiple datasets.
   datasets:
     - name: "CTU-13"
       raw_path: "data/raw/CTU-13/"
@@ -39,7 +44,19 @@ feature_pipeline:
     method: "z_score"
     per_feature_stats_path: "data/processed/feature_stats.json"
 
-  # Missing-value handling
+  # Columns that must NEVER be z-score normalized, even though they are
+  # numeric-typed — they're categorical/ID-like (ports, protocol numbers,
+  # connection-state codes) and normalizing them would corrupt the features
+  # the graph builder and GNN encoder rely on. This list is *added to* the
+  # engine's built-in defaults (which already cover common CIC-IDS-2018 /
+  # CTU-13 column names) — only list dataset-specific extras here.
+  exclude_from_normalization: []
+
+  # Column holding the ground-truth label. Always excluded from numeric
+  # conversion and normalization, kept as-is through the whole pipeline.
+  label_column: "Label"
+
+  # Missing-value handling. One of: forward_fill | zero_fill | mean_fill
   missing_value_strategy: "forward_fill"
 
   # Reserved for future categorical processing
